@@ -1,32 +1,50 @@
-const CheeToggl = require("./CheeToggl.js")
-
+const CheeToggl = require("./CheeToggl.js");
 const cheeToggl = new CheeToggl({
-  apiToken: "YOUR API TOKEN",
+  apiToken: "YOUR_API_TOKEN",
   datetimeFormat: "YYYY/MM/DD h:mm",
-  timeZone: "Asia/Tokyo"
+  timeZone: "Asia/Tokyo",
 });
-const workingPid = 1234; // YOUR WORK PROJECT ID
-const breakPid = 5678; // YOUR BREAKING TIME PROJECT ID
+
+const data = require("./data.json");
+
+const workingPid = 0000000; // YOUR WORK PROJECT ID
+const workingDescription = "work";
+const breakPid = 0000000; // YOUR BREAKING TIME PROJECT ID
 
 (async () => {
-  // // Read Recent TimeEntry Example
-  // console.log(
-  //   await cheeToggl.list({
-  //     start: "2019/11/12 20:22",
-  //     end: "2019/11/13 21:22",
-  //   })
-  // )
+  const list = data.map((d) => {
+    return [
+      {
+        description: workingDescription,
+        pid: workingPid,
+        start: d.start,
+        stop: `${d.start.slice(0, -5)}13:00`,
+        billiable: true,
+      },
+      {
+        description: "lunch",
+        pid: breakPid,
+        start: `${d.start.slice(0, -5)}13:00`,
+        stop: `${d.start.slice(0, -5)}14:00`,
+        billiable: true,
+      },
+      {
+        description: workingDescription,
+        pid: workingPid,
+        start: `${d.start.slice(0, -5)}14:00`,
+        stop: d.end,
+        billiable: true,
+      },
+    ];
+  });
 
-  // // Add One TimeEntry Example
-  // console.log(
-  //   await cheeToggl.addOne({
-  //     description: "Coding", pid: workingPid, start: "2019/12/12 20:22", stop: "2019/12/12 21:22", billiable: true
-  //   })
-  // )
+  const interval = 1000;
 
-  // // Add TimeEntries Example
-  // await cheeToggl.add([
-  //   { description: "Coding", pid: workingPid, start: "2019/12/12 13:00", stop: "2019/12/12 14:00", billiable: true },
-  //   { description: "Lunch", pid: breakPid, start: "2019/12/12 14:00", stop: "2019/12/12 15:00", billiable: false },
-  // ])
+  for (let i = 0; i < list.length; i++) {
+    setTimeout(() => {
+      cheeToggl.add([...list[i]]);
+      console.log("*");
+    }, i * interval);
+  }
+  console.log("complete.");
 })();
